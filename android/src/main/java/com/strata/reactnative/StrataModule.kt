@@ -1,11 +1,7 @@
 package com.strata.reactnative
 
 import com.facebook.react.bridge.*
-import android.content.Context
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
+
 
 /**
  * Strata React Native module for Android.
