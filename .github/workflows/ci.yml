@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
@@ -77,7 +80,14 @@ jobs:
       - name: Build Android
         if: steps.check_android.outputs.exists == 'true'
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug --no-daemon
+          else
+            echo "Gradle wrapper not found in android directory"
+            exit 1
+          fi
 
   build-ios:
     name: Build iOS
