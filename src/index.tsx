@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import type React from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { 
   NativeModules, 
   Platform, 
   Dimensions, 
   PixelRatio, 
   View,
-  GestureResponderEvent
+  type GestureResponderEvent
 } from 'react-native';
 
 const { StrataReactNativePlugin } = NativeModules;
@@ -116,12 +117,12 @@ export function useDevice(): DeviceProfile {
       setDeviceProfile(prev => ({
         ...prev,
         ...nativeInfo,
-        deviceType: (nativeInfo.deviceType as any) || 'mobile',
+        deviceType: (nativeInfo.deviceType as DeviceProfile['deviceType']) || 'mobile',
         orientation: height >= width ? 'portrait' : 'landscape',
         screenWidth: width,
         screenHeight: height,
         safeAreaInsets: safeArea || { top: 0, right: 0, bottom: 0, left: 0 },
-        performanceMode: (performance.mode as any) || 'high',
+        performanceMode: (performance.mode as DeviceProfile['performanceMode']) || 'high',
       }));
     };
 

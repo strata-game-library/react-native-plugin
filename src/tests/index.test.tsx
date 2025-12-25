@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useDevice } from '../index';
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules } from 'react-native';
 
 jest.mock('react-native', () => ({
   NativeModules: {
