@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import type React from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { 
   NativeModules, 
   Platform, 
   Dimensions, 
   PixelRatio, 
   View,
-  GestureResponderEvent
+  type GestureResponderEvent
 } from 'react-native';
 
 const { StrataReactNativePlugin } = NativeModules;
@@ -83,7 +84,7 @@ export function useDevice(): DeviceProfile {
     const updateDeviceInfo = async () => {
       const { width, height } = Dimensions.get('window');
       
-      let nativeInfo: any = { deviceType: 'mobile', platform: Platform.OS };
+      let nativeInfo: DeviceProfile | { deviceType: string, platform: string } = { deviceType: 'mobile', platform: Platform.OS };
       let safeArea = { top: 0, right: 0, bottom: 0, left: 0 };
       let performance = { mode: 'high' };
 
@@ -97,7 +98,7 @@ export function useDevice(): DeviceProfile {
           nativeInfo = profile;
           safeArea = profile.safeAreaInsets || { top: 0, right: 0, bottom: 0, left: 0 };
           performance = { mode: profile.performanceMode || profile.mode || 'high' };
-        } catch (e) {
+        } catch (_e) {
           try {
             const [info, insets, perf] = await Promise.all([
               StrataReactNativePlugin.getDeviceInfo(),
@@ -116,12 +117,13 @@ export function useDevice(): DeviceProfile {
       setDeviceProfile(prev => ({
         ...prev,
         ...nativeInfo,
-        deviceType: (nativeInfo.deviceType as any) || 'mobile',
+        platform: (nativeInfo.platform as DeviceProfile['platform']) || prev.platform,
+        deviceType: (nativeInfo.deviceType as DeviceProfile['deviceType']) || 'mobile',
         orientation: height >= width ? 'portrait' : 'landscape',
         screenWidth: width,
         screenHeight: height,
         safeAreaInsets: safeArea || { top: 0, right: 0, bottom: 0, left: 0 },
-        performanceMode: (performance.mode as any) || 'high',
+        performanceMode: (performance.mode as DeviceProfile['performanceMode']) || 'high',
       }));
     };
 
@@ -164,7 +166,7 @@ export function useInput(): InputSnapshot {
             touches: prev.touches // Keep JS-side touches
           }));
         }
-      } catch (e) {
+      } catch (_e) {
         // Silently fail polling
       }
     }, 16); // ~60fps poll for native input
