@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/strata-game-library/react-native-plugin/compare/v1.0.1...v1.1.0) (2025-12-27)
+
+
+### Features
+
+* Add native iOS and Android modules ([#5](https://github.com/strata-game-library/react-native-plugin/issues/5)) ([57ae2de](https://github.com/strata-game-library/react-native-plugin/commit/57ae2dee8379f69ee9a998d5ac7fa17ad4e09d88)), closes [#4](https://github.com/strata-game-library/react-native-plugin/issues/4) [#10](https://github.com/strata-game-library/react-native-plugin/issues/10)
+
 ## [1.0.1](https://github.com/strata-game-library/react-native-plugin/compare/v1.0.0...v1.0.1) (2025-12-27)
 
 
