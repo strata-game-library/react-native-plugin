@@ -1,6 +1,6 @@
 {
   "name": "@strata-game-library/react-native-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React Native plugin for Strata 3D - cross-platform input, device detection, and haptics for mobile games",
   "type": "module",
   "main": "./dist/index.js",

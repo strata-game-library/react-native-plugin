@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/strata-game-library/react-native-plugin/compare/v1.0.0...v1.0.1) (2025-12-27)
+
+
+### Bug Fixes
+
+* **cd:** use CI_GITHUB_TOKEN for semantic-release ([#21](https://github.com/strata-game-library/react-native-plugin/issues/21)) ([61d6df4](https://github.com/strata-game-library/react-native-plugin/commit/61d6df40d25f23e222d4b3e254ea088293727358))
+* **cd:** use GITHUB_TOKEN for semantic-release ([#20](https://github.com/strata-game-library/react-native-plugin/issues/20)) ([46a0836](https://github.com/strata-game-library/react-native-plugin/commit/46a08362aa75586196cc9a692680af14d8248c21))
+
 # 1.0.0 (2025-12-27)
 
 
