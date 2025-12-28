@@ -19,8 +19,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
     "test": "jest",
@@ -73,6 +73,7 @@
     "rimraf": "^6.1.0",
     "semantic-release": "^25.0.2",
     "ts-jest": "^29.4.6",
+    "tsup": "^8.5.0",
     "typescript": "^5.9.0"
   },
   "publishConfig": {
