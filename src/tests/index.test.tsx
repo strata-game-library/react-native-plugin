@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks/native';
+import { renderHook } from '@testing-library/react-native';
 import { useDevice } from '../index';
 
 jest.mock('react-native', () => ({

@@ -35,7 +35,7 @@ jobs:
 
       - name: Install dependencies (npm)
         if: hashFiles('package-lock.json') != ''
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Install dependencies (pnpm)
         if: hashFiles('pnpm-lock.yaml') != ''

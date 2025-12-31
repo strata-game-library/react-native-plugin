@@ -38,7 +38,7 @@ jobs:
           if [ -f "pnpm-lock.yaml" ]; then
             npm install -g pnpm && pnpm install --frozen-lockfile
           else
-            npm ci || npm install
+            npm ci --legacy-peer-deps || npm install --legacy-peer-deps
           fi
 
       - name: Build TypeDoc (Markdown)
