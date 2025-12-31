@@ -1,61 +1,45 @@
-# @strata/react-native-plugin
+# Org-Specific Overrides
 
-[![npm version](https://img.shields.io/npm/v/@strata/react-native-plugin.svg)](https://www.npmjs.com/package/@strata/react-native-plugin)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+Place files here to override enterprise defaults from jbcom/control-center.
 
-React Native plugin for [Strata 3D](https://strata.game) - cross-platform input, device detection, and haptics for mobile games.
+## Directory Structure
 
-## 📚 Documentation
+```
+repository-files/
+├── always-sync/          # From enterprise (don't edit)
+├── initial-only/         # From enterprise (don't edit)  
+├── python/               # From enterprise (don't edit)
+├── nodejs/               # From enterprise (don't edit)
+├── go/                   # From enterprise (don't edit)
+├── rust/                 # From enterprise (don't edit)
+├── terraform/            # From enterprise (don't edit)
+└── org-overrides/        # YOUR ORG CUSTOMIZATIONS HERE
+    ├── .github/
+    │   └── workflows/    # Org-specific workflows
+    ├── .cursor/
+    │   └── rules/        # Org-specific Cursor rules
+    ├── CLAUDE.md         # Org-specific Claude instructions
+    └── AGENTS.md         # Org-specific agent instructions
+```
 
-**Full documentation is available at [strata.game/mobile/react-native](https://strata.game/mobile/react-native/)**
+## Merge Order
 
----
+When syncing to repos, files are applied in this order:
+1. Enterprise `always-sync/` (base)
+2. Language-specific rules (python/, nodejs/, etc.)
+3. **Org overrides** (this directory - wins on conflicts)
+4. `initial-only/` (only if file doesn't exist)
 
-## 🏢 Enterprise Context
+## Examples
 
-**Strata** is the Games & Procedural division of the [jbcom enterprise](https://jbcom.github.io). This plugin is part of a coherent suite of specialized tools, sharing a unified design system and interconnected with sibling organizations like [Agentic](https://agentic.dev) and [Extended Data](https://extendeddata.dev).
-
-## Features
-
-- **Device Detection** - Identify device type, platform, and performance capabilities
-- **Input Handling** - Unified touch input handling with `StrataInputProvider`
-- **Haptic Feedback** - Cross-platform vibration with intensity control
-- **Safe Area Insets** - Native safe area detection for notches
-- **Orientation** - Get and set screen orientation
-- **Performance Mode** - Detect low power mode and hardware levels
-
-## Installation
-
+### Override CI workflow for your org
 ```bash
-npm install @strata/react-native-plugin
-cd ios && pod install
+cp repository-files/always-sync/.github/workflows/ci.yml \
+   repository-files/org-overrides/.github/workflows/ci.yml
+# Then edit ci.yml with org-specific changes
 ```
 
-## Quick Start
-
-```tsx
-import { useDevice, useInput, useHaptics } from '@strata/react-native-plugin';
-
-function Game() {
-  const device = useDevice();
-  const input = useInput();
-  const { trigger } = useHaptics();
-  
-  return (
-    <View>
-      <Text>Platform: {device.platform}</Text>
-      <Button onPress={() => trigger({ intensity: 'medium' })} />
-    </View>
-  );
-}
+### Add org-specific Cursor rule
+```bash
+echo "# My Org Rule" > repository-files/org-overrides/.cursor/rules/my-org.mdc
 ```
-
-## Related
-
-- [Strata Documentation](https://strata.game) - Full documentation
-- [Strata Core](https://github.com/strata-game-library/core) - Main library
-- [Capacitor Plugin](https://github.com/strata-game-library/capacitor-plugin) - Capacitor version
-
-## License
-
-MIT © [Jon Bogaty](https://github.com/jbcom)

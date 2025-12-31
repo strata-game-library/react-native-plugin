@@ -1,8 +1,10 @@
 # CI - Build, Lint, Test
-# Quality gates for pull requests
+# Core quality gates - runs on every PR and push to main
 name: CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -15,125 +17,117 @@ permissions:
 
 jobs:
   build:
-    name: Build & Lint
+    name: Build
     runs-on: ubuntu-latest
+    outputs:
+      should_test: ${{ steps.changes.outputs.should_test }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      - uses: actions/checkout@v4 # v4.2.2
+      - uses: actions/setup-node@v4 # v4.2.0
         with:
           node-version: '22'
-          cache: 'npm'
-
+      - uses: pnpm/action-setup@v4 # v4.0.0
+        with:
+          version: 9
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          STORE_PATH=$(pnpm store path --silent 2>/dev/null || true)
+          STORE_PATH="${STORE_PATH:-${XDG_DATA_HOME:-$HOME/.local/share}/pnpm/store}"
+          echo "store=$STORE_PATH" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4 # v4.2.0
+        with:
+          path: ${{ steps.pnpm-cache.outputs.store }}
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+          restore-keys: pnpm-store-
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Type check
-        run: npm run typecheck
-
+        run: pnpm install
       - name: Build
-        run: npm run build
-
+        run: pnpm run build
+      - name: Lint
+        run: pnpm run lint
+      - name: Type check
+        run: pnpm run typecheck
+      - name: Check if tests should run
+        id: changes
+        run: |
+          # Run tests on PRs and pushes to main
+          echo "should_test=true" >> $GITHUB_OUTPUT
       - name: Upload build artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@v4 # v4.6.0
         with:
           name: build-output
           path: dist
           retention-days: 1
-
   test:
-    name: Tests
+    name: Unit Tests
     needs: build
+    if: needs.build.outputs.should_test == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      - uses: actions/checkout@v4 # v4.2.2
+      - uses: actions/setup-node@v4 # v4.2.0
         with:
           node-version: '22'
-          cache: 'npm'
-
+      - uses: pnpm/action-setup@v4 # v4.0.0
+        with:
+          version: 9
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        run: pnpm install
+      - uses: actions/download-artifact@v4 # v4.1.8
         with:
           name: build-output
           path: dist
 
-      - name: Run tests
-        run: npm run test
+      - name: Run tests with coverage
+        run: pnpm run test:coverage -- --reporter=default --reporter=vitest-agentic-control
 
-  build-android:
-    name: Build Android
+      - name: Report Coveralls
+        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2.3.7
+        with:
+          file: coverage/lcov.info
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4 # v4.6.0
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 7
+
+  e2e:
+    name: E2E Tests
+    needs: [build, test]
+    if: >-
+      needs.test.result == 'success' &&
+      contains(github.event.pull_request.labels.*.name, 'run-e2e')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      - uses: actions/checkout@v4 # v4.2.2
+      - uses: actions/setup-node@v4 # v4.2.0
         with:
           node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-
-      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      - uses: pnpm/action-setup@v4 # v4.0.0
         with:
-          java-version: '17'
-          distribution: 'zulu'
-
-      - name: Check Android Directory
-        id: check_android
-        run: |
-          if [ -d "android" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "Android directory not found, skipping build verification."
-          fi
-
-      - name: Build Android
-        if: steps.check_android.outputs.exists == 'true'
-        working-directory: android
-        run: |
-          if [ -f "./gradlew" ]; then
-            chmod +x ./gradlew
-            ./gradlew assembleDebug --no-daemon
-          else
-            echo "Gradle wrapper not found in android directory. Skipping native build verification."
-          fi
-
-  build-ios:
-    name: Build iOS
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
-        with:
-          node-version: '22'
-          cache: 'npm'
-
+          version: 9
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: pnpm install
+      - uses: actions/download-artifact@v4 # v4.1.8
+        with:
+          name: build-output
+          path: dist
 
-      - name: Check iOS Directory
-        id: check_ios
-        run: |
-          if [ -d "ios" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "iOS directory not found, skipping build verification."
-          fi
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
 
-      - name: Build iOS
-        if: steps.check_ios.outputs.exists == 'true'
-        working-directory: ios
-        run: |
-          echo "iOS directory exists. In a real scenario, we would run xcodebuild here."
-          # xcodebuild -scheme MyPlugin -sdk iphonesimulator build
+      - name: Run E2E tests
+        run: pnpm run test:e2e -- --project=chromium --reporter=agentic-triage/reporters/playwright
+
+      - name: Upload E2E results
+        uses: actions/upload-artifact@v4 # v4.6.0
+        if: always()
+        with:
+          name: e2e-results
+          path: test-results/
+          retention-days: 7
