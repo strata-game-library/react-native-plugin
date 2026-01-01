@@ -5,10 +5,11 @@ module.exports = {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['module:@react-native/babel-preset'] }],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@testing-library)/)',
+    'node_modules/(?!(react-native|@react-native|@testing-library|@react-native/js-polyfills)/)',
   ],
   testMatch: ['**/tests/**/*.test.(ts|tsx)', '**/src/**/*.test.(ts|tsx)'],
   testEnvironment: 'node',
+  setupFiles: [],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.test.{ts,tsx}',
