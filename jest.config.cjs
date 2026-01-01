@@ -6,7 +6,7 @@ module.exports = {
     }],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@testing-library)/)',
+    'node_modules/(?!(react-native|@react-native|@testing-library|@react-native/js-polyfills)/)',
   ],
   testMatch: ['**/tests/**/*.test.(ts|tsx)', '**/src/**/*.test.(ts|tsx)'],
   testEnvironment: 'node',
@@ -20,4 +20,5 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
+  setupFiles: []
 };
